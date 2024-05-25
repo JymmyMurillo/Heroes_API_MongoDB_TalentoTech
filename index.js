@@ -1,7 +1,11 @@
 const express = require("express");
 const app = express();
 const port = 3000;
-const database = require("./database");
+const connectDB = require("./database");
+const Hero = require("./hero");
+
+//Conectar a la base de datos
+connectDB();
 
 // Iniciar el servidor
 app.listen(port, () => {
@@ -17,22 +21,21 @@ app.get("/", (req, res) => {
 
 // Obtener todos los héroes
 app.get("/heroes", async (req, res) => {
-  const connection = await database.getConnection();
-  const result = await connection.query("SELECT * from heroes_list");
-  res.json(result);
+  try {
+    const heroes = await Hero.find();
+    res.json(heroes);
+  } catch (error) {
+    res.status(500).send("Error al obtener la lista de heroes");
+  }
 });
 
 // Obtener un héroe por ID
 app.get("/heroes/:id", async (req, res) => {
   try {
-    const connection = await database.getConnection();
-    const result = await connection.query(
-      "SELECT * from heroes_list WHERE id = ?",
-      req.params.id
-    );
-    if (result.length === 0)
+    const hero= await Hero.findById(req.params.id)
+    if (!hero)
       return res.status(404).send("El héroe no fue encontrado");
-    res.json(result);
+    res.json(hero);
   } catch (error) {
     res.status(500).send("Error al buscar el heroe");
   }
@@ -59,12 +62,8 @@ app.post("/heroes", async (req, res) => {
   }
 
   try {
-    const connection = await database.getConnection();
-    const result = await connection.query(
-      "INSERT INTO heroes_list (name, image) VALUES (?, ?)",
-      [name, image]
-    );
-    const newHero = { name, image };
+    const newHero = new Hero({ name, image });
+    await newHero.save();
     res.status(201).json(newHero);
   } catch (error) {
     res.status(500).send("Error crear heroe");
@@ -92,22 +91,20 @@ app.put("/heroes/:id", async (req, res) => {
   }
 
   try {
-    const connection = await database.getConnection();
-    const result = await connection.query("UPDATE heroes_list SET name = ?, image = ? WHERE id = ?", [name, image, req.params.id]);
-    if (result.affectedRows === 0) return res.status(404).send("El heroe no fue encontrado")
-    const updatedHero = { id: req.params.id, name, image };
+    const updatedHero = await Hero.findByIdAndUpdate(req.params.id, {name, image}, {new:true})
+    if (!updatedHero) return res.status(404).send("El heroe no fue encontrado");
     res.status(201).json(updatedHero);
   } catch (error) {
     res.status(500).send("Error al actualizar heroe");
   }
 });
 
+
 // Eliminar un héroe
 app.delete("/heroes/:id", async(req, res) => {
   try {
-    const connection = await database.getConnection();
-    const result = await connection.query("DELETE FROM heroes_list WHERE id = ?", [req.params.id]);
-    if (result.affectedRows === 0) return res.status(404).send("El heroe no fue encontrado")
+    const deletedHero = await Hero.findByIdAndDelete(req.params.id)
+    if (!deletedHero) return res.status(404).send("El heroe no fue encontrado");
     res.status(201).json({ message: "Heroe eliminado"});
   } catch (error) {
     res.status(500).send("Error al actualizar heroe");
