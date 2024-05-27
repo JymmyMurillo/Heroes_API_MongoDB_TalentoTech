@@ -12,56 +12,65 @@ Esta es una API simple para gestionar una lista de heroes. Permite realizar oper
 
 1. Clona el repositorio:
 ```sh
-git clone https://github.com/JymmyMurillo/Heroes_API_MySql_TalentoTech.git
+git clone https://github.com/JymmyMurillo/Heroes_API_MongoDB_TalentoTech.git
 ```
 2. Instalar dependencias:
 ```sh
 npm install
 ```
 
-3. Configura la base de datos:
-- Crea una base de datos en MySQL.
-- Ejecuta el siguiente script SQL para crear la tabla necesaria:
+3. Crea el archivo database.js en el directorio raíz del proyecto:
 
 ```sh
-CREATE TABLE heroes_list (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  image VARCHAR(255) NOT NULL
-);
-```
-
-4. Configura la conexión a la base de datos:
-
-- Crea un archivo database.js en el directorio raíz del proyecto y añade la configuración de la base de datos:
-javascript
-
-```sh
-const mysql = require("promise-mysql");
+const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 dotenv.config();
 
-const connection = mysql.createConnection({
-  host: process.env.host,
-  database: process.env.database,
-  user: process.env.user,
-  password: process.env.password,
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("MongoDB connected");
+  } catch (error) {
+    console.error("MongoDB connection error:", error);
+    process.exit(1);
+  }
+};
+
+module.exports = connectDB;
+
+```
+
+4. Crea el archivo hero.js en el directorio raíz del proyecto:
+
+```sh
+const mongoose = require("mongoose");
+
+const heroSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  image: {
+    type: String,
+    required: true,
+    trim: true,
+  },
 });
 
-const getConnection = async () => await connection;
+const Hero = mongoose.model("Hero", heroSchema);
 
-module.exports = {
-  getConnection,
-};
+module.exports = Hero;
+
 
 ```
  5. Configura un nuevo archivo .env
 
  ```sh
- HOST=colocaElHostName
-DATABASE=ColocaElNombreDeBaseDeDatos
-USER=colocaNombreDeUsusario
-PASSWORD=colocaContraseña
+MONGO_URI=mongodb://tu_usuario:tu_contraseña@tu_host:tu_puerto/tu_base_de_datos
 
 ```
 
