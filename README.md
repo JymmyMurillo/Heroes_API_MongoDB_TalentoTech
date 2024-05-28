@@ -6,7 +6,7 @@ Esta es una API simple para gestionar una lista de heroes. Permite realizar oper
 
 - Node.js (V14 o superior)
 - nmp (V6 o superior)
-- Una base de datos MySql
+- Una base de datos MongoDB
 
 ## Instalacion
 
