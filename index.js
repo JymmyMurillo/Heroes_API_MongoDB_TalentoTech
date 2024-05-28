@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const app = express();
 const port = 3000;
 const connectDB = require("./database");
@@ -6,6 +7,14 @@ const Hero = require("./hero");
 
 //Conectar a la base de datos
 connectDB();
+
+// Middleware para permitir CORS
+app.use(
+  cors({
+    origin: ["http://127.0.0.1:5500"],
+  })
+);
+
 
 // Iniciar el servidor
 app.listen(port, () => {
