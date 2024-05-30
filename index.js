@@ -11,7 +11,11 @@ connectDB();
 // Middleware para permitir CORS
 app.use(
   cors({
-    origin: ["http://127.0.0.1:5500", "https://jymmymurillo.github.io/"],
+    origin: [
+      "http://127.0.0.1:5500",
+      "https://jymmymurillo.github.io/",
+      "https://front-heroes-api.vercel.app/",
+    ],
   })
 );
 
